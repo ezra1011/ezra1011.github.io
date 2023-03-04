@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>貝貝加油</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+  <div class="container">
+    <h1>給貝貝的考題閱讀器</h1>
+    <input type="file" id="csv-file-input" class="form-control-file my-3">
+    <div id="csv-output"></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+  <script>
+    const csvFileInput = document.getElementById('csv-file-input');
+    const csvOutput = document.getElementById('csv-output');
+
+    csvFileInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file && file.name.endsWith('.csv')) {
+        Papa.parse(file, {
+          header: true,
+          complete: (results) => {
+            const rows = results.data;
+            const table = document.createElement('table');
+            table.classList.add('table', 'table-striped', 'table-bordered', 'my-3');
+            table.innerHTML = `
+              <thead class="thead-dark">
+                <tr>
+                
+                  
+                  <th>content</th>
+                  <th>ans</th>
+                  <th>group_content</th>
+                  <th>非選題</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            `;
+            for (const row of rows) {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+              
+                
+                <td>${row.content}</td>
+                <td><button class="btn btn-link ans-toggle-btn">${row.ans ? '顯示' : '隱藏'}</button><span class="d-none">${row.ans}</span></td>
+                <td>${row.group_content}</td>
+                <td>${row['非選題']}</td>
+              `;
+              table.querySelector('tbody').appendChild(tr);
+            }
+            csvOutput.innerHTML = '';
+            csvOutput.appendChild(table);
+
+            const ansToggleBtns = document.querySelectorAll('.ans-toggle-btn');
+            ansToggleBtns.forEach((btn) => {
+              btn.addEventListener('click', () => {
+                const ansCell = btn.parentNode.querySelector('span');
+                if (ansCell.classList.contains('d-none')) {
+                  ansCell.classList.remove('d-none');
+                  btn.textContent = '隱藏';
+                } else {
+                  ansCell.classList.add('d-none');
+                  btn.textContent = '顯示';
+                }
+              });
+            });
+          },
+          error: (error) => {
+            console.error(error);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
